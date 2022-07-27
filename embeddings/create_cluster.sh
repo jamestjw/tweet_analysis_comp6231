@@ -6,12 +6,12 @@ gcloud beta dataproc clusters create ${CLUSTER_NAME} \
     --metadata 'PIP_PACKAGES=google-cloud-storage spark-nlp==2.7.2' \
     --worker-machine-type n1-standard-8 \
     --num-workers 2 \
-    --num-secondary-workers=2 \
     --image-version 1.4-debian10 \
     --initialization-actions gs://dataproc-initialization-actions/python/pip-install.sh \
     --optional-components=JUPYTER,ANACONDA \
     --enable-component-gateway \
-    --project="comp-6231-356417"
+    --project="comp-6231-356417" \
+    --max-idle 10m \
 
 gcloud dataproc jobs submit pyspark --cluster ${CLUSTER_NAME}\
     --region ${REGION}\
