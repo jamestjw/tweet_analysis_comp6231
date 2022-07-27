@@ -53,4 +53,4 @@ output_gs_uri = f"{OUTPUT_DIR}/bert-embeddings-{data_file}.parquet"
 df_bert.select(
     F.col("Tweet Id").alias("tweet_id"),
     F.col("sentence_embeddings").alias("embeddings"),
-).write.parquet(output_gs_uri)
+).write.mode("overwrite").parquet(output_gs_uri)
