@@ -13,10 +13,12 @@ from pyspark.sql.types import (
 import seaborn as sns
 from sklearn.datasets import make_blobs
 import matplotlib.pyplot as plt
+import os
 
 spark = (
-    SparkSession.builder.appName("clusteringtest")
-    #     .config("spark.jars.packages", "graphframes:graphframes-0.8.2-spark3.1-s_2.12")
+    SparkSession.builder.appName("clusteringtest").config(
+        "spark.jars.packages", "graphframes:graphframes-0.8.2-spark3.1-s_2.12"
+    )
     # This line may or may not be necessary
     .getOrCreate()
 )
@@ -71,7 +73,7 @@ res = dbscan.process(
     min_pts=10,
     dist=euclidean,
     dim=2,
-    checkpoint_dir="./checkpoint",
+    checkpoint_dir="gs://tweet_analysis/clustering/checkpoints",
     operations=None,
 )
 
@@ -115,4 +117,8 @@ sns.scatterplot(
 
 
 OUTPUT_DIR = "gs://tweet_analysis/clustering"
-fig.savefig(f"{OUTPUT_DIR}/clustering-poc-output.png")
+TMP_DIR = "/tmp"
+fig.savefig(f"{TMP_DIR}/clustering-poc-output.png")
+os.system(
+    f"gsutil cp {TMP_DIR}/clustering-poc-output.png {OUTPUT_DIR}/clustering-poc-output.png"
+)
