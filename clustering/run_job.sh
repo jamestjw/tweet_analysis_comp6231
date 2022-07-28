@@ -17,7 +17,7 @@ gcloud beta dataproc clusters create ${CLUSTER_NAME} \
 
 gcloud dataproc jobs submit pyspark --cluster ${CLUSTER_NAME}\
     --region ${REGION}\
-    --properties=spark.jars.packages=com.johnsnowlabs.nlp:spark-nlp_2.11:2.7.2\
+    --properties=spark.jars.packages=graphframes:graphframes:0.8.2-spark3.1-s_2.12\
     --driver-log-levels root=FATAL \
     --project="comp-6231-356417" \
     dummy-clustering.py

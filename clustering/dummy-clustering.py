@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 from pyspark.sql import SparkSession
-from pyspark_dbscan import dbscan
+import dbscan
 from scipy.spatial.distance import euclidean
 from pyspark.sql.types import (
     ArrayType,
