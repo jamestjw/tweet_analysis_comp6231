@@ -1,7 +1,5 @@
 import time
 
-import sparknlp
-
 from sparknlp.base import *
 from sparknlp.annotator import *
 from pyspark.ml import Pipeline
@@ -21,36 +19,27 @@ dataset = spark.read.option("header", True).csv(gs_uri).na.drop(subset=["Text"])
 # We need to convert plain text to a Spark Document type
 document_assembler = DocumentAssembler().setInputCol("Text").setOutputCol("document")
 
-tokenizer = Tokenizer().setInputCols(["document"]).setOutputCol("token")
-
-bert_embeddings = (
-    BertEmbeddings()
-    .pretrained(name="small_bert_L4_256", lang="en")
-    .setInputCols(["document", "token"])
-    .setOutputCol("embeddings")
-)
+MODEL_NAME = "sent_small_bert_L2_256"
 
 embeddingsSentence = (
-    SentenceEmbeddings()
-    .setInputCols(["document", "embeddings"])
-    .setOutputCol("sentence_embeddings")
-    .setPoolingStrategy("AVERAGE")
+    BertSentenceEmbeddings.pretrained(MODEL_NAME, "en")
+    .setInputCols("document")
+    .setOutputCol("sentence_bert_embeddings")
 )
 
 bert_pipeline = Pipeline(
-    stages=[document_assembler, tokenizer, bert_embeddings, embeddingsSentence]
+    stages=[document_assembler, embeddingsSentence]
 )
 
 # Generate embeddings for dataframe
 df_bert = bert_pipeline.fit(dataset).transform(dataset)
-# Retain only the vector and drop everything else in the column
 df_bert = df_bert.withColumn(
-    "sentence_embeddings", df_bert.sentence_embeddings[0].embeddings
+    "sentence_bert_embeddings", df_bert.sentence_embeddings[0].embeddings
 )
 
-output_gs_uri = f"{OUTPUT_DIR}/bert-embeddings-{data_file}.parquet"
+output_gs_uri = f"{OUTPUT_DIR}/bert-embeddings-{MODEL_NAME}-{data_file}.parquet"
 # Only save the tweet_id and the embeddings
 df_bert.select(
     F.col("Tweet Id").alias("tweet_id"),
-    F.col("sentence_embeddings").alias("embeddings"),
+    F.col("sentence_bert_embeddings").alias("embeddings"),
 ).write.mode("overwrite").parquet(output_gs_uri)
