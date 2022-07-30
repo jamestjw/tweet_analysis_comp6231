@@ -1,21 +1,26 @@
 CLUSTER_NAME=sentiment-analysis-cluster-$(date +%s)
 REGION=us-east1
 
+# Worker machine type: 8 cores and 45gb * 1024 memory
 gcloud beta dataproc clusters create ${CLUSTER_NAME} \
     --region ${REGION} \
-    --metadata 'PIP_PACKAGES=google-cloud-storage spark-nlp==2.7.2' \
+    --metadata 'PIP_PACKAGES=google-cloud-storage spark-nlp' \
     --worker-machine-type n1-standard-8 \
-    --num-workers 4 \
-    --image-version 1.4-debian10 \
+    --master-boot-disk-size=128GB \
+    --worker-boot-disk-size=128GB \
+    --num-workers 2 \
+    --image-version 2.0 \
     --initialization-actions gs://dataproc-initialization-actions/python/pip-install.sh \
-    --optional-components=JUPYTER,ANACONDA \
+    --optional-components=JUPYTER \
     --enable-component-gateway \
     --project="comp-6231-356417" \
     --max-idle 20m \
+    --properties spark:spark.serializer=org.apache.spark.serializer.KryoSerializer,spark:spark.driver.maxResultSize=0,spark:spark.kryoserializer.buffer.max=2000M,spark:spark.jars.packages=com.johnsnowlabs.nlp:spark-nlp_2.12:4.0.2
+
 
 gcloud dataproc jobs submit pyspark --cluster ${CLUSTER_NAME}\
     --region ${REGION}\
-    --properties=spark.jars.packages=com.johnsnowlabs.nlp:spark-nlp_2.11:2.7.2\
+    --properties="spark.jars.packages=com.johnsnowlabs.nlp:spark-nlp_2.12:4.0.2,spark.kryoserializer.buffer.max=2000M,spark.serializer=org.apache.spark.serializer.KryoSerializer,spark.driver.maxResultSize=0"\
     --driver-log-levels root=FATAL \
     --project="comp-6231-356417" \
     generate-sentiment-analysis.py

@@ -4,7 +4,9 @@ from pyspark.ml import Pipeline
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
 
-spark = SparkSession.builder.appName("sentiment_analysis").getOrCreate()
+import sparknlp
+
+spark = sparknlp.start()
 
 data_filename_stem = "tweet_dump_2022-06-16"
 input_file_dir = f"gs://tweet_analysis/{data_filename_stem}.csv"
@@ -20,7 +22,6 @@ use = (
     .setInputCols(["document"])
     .setOutputCol("sentence_embeddings")
 )
-
 
 sentimentdl = (
     ClassifierDLModel.pretrained(name="classifierdl_use_emotion")
@@ -55,12 +56,10 @@ empty_df = spark.createDataFrame([[""]]).toDF("Text")
 pipelineModel = nlpPipeline.fit(empty_df)
 result = pipelineModel.transform(trainDataset)
 
-final_result = result.select(
+output_dir = f"gs://tweet_analysis/sentiment_analysis/output/{data_filename_stem}"
+result.select(
     F.col("Tweet Id").alias("tweet_id"),
     F.expr("sentiment.result[0]").alias("sentiment"),
     F.expr("sarcasm.result[0]").alias("sarcasm"),
     F.expr("cyberbullying.result[0]").alias("cyberbullying"),
-)
-
-output_dir = f"gs://tweet_analysis/sentiment_analysis/output"
-final_result.write.mode("append").csv(output_dir)
+).write.mode("append").csv(output_dir)
