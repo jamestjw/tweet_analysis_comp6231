@@ -12,10 +12,12 @@ data_filename_stem = "tweet_dump_2022-06-16"
 input_file_dir = f"gs://tweet_analysis/{data_filename_stem}.csv"
 
 trainDataset = (
-    spark.read.option("header", True).csv(input_file_dir).na.drop(subset=["Text"])
+    spark.read.format("bigquery")
+    .option("table", "comp-6231-356417:Twitter.tweets")
+    .load()
 )
 
-documentAssembler = DocumentAssembler().setInputCol("Text").setOutputCol("document")
+documentAssembler = DocumentAssembler().setInputCol("text").setOutputCol("document")
 
 use = (
     UniversalSentenceEncoder.pretrained(name="tfhub_use", lang="en")
@@ -57,11 +59,15 @@ pipelineModel = nlpPipeline.fit(empty_df)
 result = pipelineModel.transform(trainDataset)
 
 result.select(
-    F.col("Tweet Id").alias("tweet_id"),
+    F.col("tweet_id"),
     F.expr("sentiment.result[0]").alias("sentiment"),
     F.expr("sarcasm.result[0]").alias("sarcasm"),
     F.expr("cyberbullying.result[0]").alias("cyberbullying"),
-).write.format("bigquery") \
-    .option("temporaryGcsBucket","tweet_analysis_temp_bucket") \
-    .mode("append") \
-    .save("Twitter.sentiment_analysis")
+    F.current_timestamp().alias("created_at"),
+).write.format("bigquery").option(
+    "temporaryGcsBucket", "tweet_analysis_temp_bucket"
+).mode(
+    "append"
+).save(
+    "Twitter.sentiment_analysis"
+)
