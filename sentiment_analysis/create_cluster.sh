@@ -9,7 +9,7 @@ gcloud beta dataproc clusters create ${CLUSTER_NAME} \
     --worker-machine-type n1-standard-8 \
     --master-boot-disk-size=128GB \
     --worker-boot-disk-size=128GB \
-    --num-workers 2 \
+    --num-workers 6 \
     --image-version 2.0 \
     --optional-components=JUPYTER \
     --enable-component-gateway \

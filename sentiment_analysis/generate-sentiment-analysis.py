@@ -13,7 +13,7 @@ input_file_dir = f"gs://tweet_analysis/{data_filename_stem}.csv"
 
 trainDataset = (
     spark.read.format("bigquery")
-    .option("table", "comp-6231-356417:Twitter.tweets")
+    .option("table", "comp-6231-356417:Twitter.Tweets")
     .load()
 )
 
