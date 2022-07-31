@@ -25,10 +25,10 @@ use = (
     .setOutputCol("sentence_embeddings")
 )
 
-sentimentdl = (
+emotion_classifier = (
     ClassifierDLModel.pretrained(name="classifierdl_use_emotion")
     .setInputCols(["sentence_embeddings"])
-    .setOutputCol("sentiment")
+    .setOutputCol("emotion")
 )
 
 sarcasm_classifier = (
@@ -47,7 +47,7 @@ nlpPipeline = Pipeline(
     stages=[
         documentAssembler,
         use,
-        sentimentdl,
+        emotion_classifier,
         sarcasm_classifier,
         cyberbullying_classifier,
     ]
@@ -60,7 +60,7 @@ result = pipelineModel.transform(trainDataset)
 
 result.select(
     F.col("tweet_id"),
-    F.expr("sentiment.result[0]").alias("sentiment"),
+    F.expr("emotion.result[0]").alias("emotion"),
     F.expr("sarcasm.result[0]").alias("sarcasm"),
     F.expr("cyberbullying.result[0]").alias("cyberbullying"),
     F.current_timestamp().alias("created_at"),
