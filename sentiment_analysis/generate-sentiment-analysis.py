@@ -56,10 +56,12 @@ empty_df = spark.createDataFrame([[""]]).toDF("Text")
 pipelineModel = nlpPipeline.fit(empty_df)
 result = pipelineModel.transform(trainDataset)
 
-output_dir = f"gs://tweet_analysis/sentiment_analysis/output/{data_filename_stem}"
 result.select(
     F.col("Tweet Id").alias("tweet_id"),
     F.expr("sentiment.result[0]").alias("sentiment"),
     F.expr("sarcasm.result[0]").alias("sarcasm"),
     F.expr("cyberbullying.result[0]").alias("cyberbullying"),
-).write.mode("append").csv(output_dir)
+).write.format("bigquery") \
+    .option("temporaryGcsBucket","tweet_analysis_temp_bucket") \
+    .mode("append") \
+    .save("Twitter.sentiment_analysis")
