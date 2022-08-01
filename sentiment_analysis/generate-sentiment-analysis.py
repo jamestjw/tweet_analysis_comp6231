@@ -3,21 +3,31 @@ from sparknlp.annotator import *
 from pyspark.ml import Pipeline
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-
 import sparknlp
+import argparse
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 spark = sparknlp.start()
 
-data_filename_stem = "tweet_dump_2022-06-16"
-input_file_dir = f"gs://tweet_analysis/{data_filename_stem}.csv"
+parser = argparse.ArgumentParser()
+parser.add_argument("date", help="Date to run the data on")
+args = parser.parse_args()
+
+logger.info(f"Running job for date {args.date}")
 
 trainDataset = (
     spark.read.format("bigquery")
     .option("table", "comp-6231-356417:Twitter.Tweets")
+    .option("filter", f'DATE(created_at) = DATE("{args.date}")')
     .load()
 )
 
-documentAssembler = DocumentAssembler().setInputCol("text").setOutputCol("document")
+logger.info(f"Processing {trainDataset.count()} rows.")
+
+documentAssembler = DocumentAssembler().setInputCol("content").setOutputCol("document")
 
 use = (
     UniversalSentenceEncoder.pretrained(name="tfhub_use", lang="en")
@@ -53,7 +63,11 @@ nlpPipeline = Pipeline(
     ]
 )
 
+logger.info("Pipeline setup successfully.")
+
 empty_df = spark.createDataFrame([[""]]).toDF("Text")
+
+logger.info("Starting transformation of data")
 
 pipelineModel = nlpPipeline.fit(empty_df)
 result = pipelineModel.transform(trainDataset)
