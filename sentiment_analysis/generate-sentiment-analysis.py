@@ -14,6 +14,7 @@ spark = sparknlp.start()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("date", help="Date to run the data on")
+parser.add_argument("--enddate", help="Optional end date")
 args = parser.parse_args()
 
 logger.info(f"Running job for date {args.date}")
@@ -21,9 +22,16 @@ logger.info(f"Running job for date {args.date}")
 trainDataset = (
     spark.read.format("bigquery")
     .option("table", "comp-6231-356417:Twitter.Tweets")
-    .option("filter", f'DATE(created_at) = DATE("{args.date}")')
     .load()
 )
+
+if args.enddate:
+    logger.info(f"End date: {args.enddate}")
+    trainDataset = trainDataset.where(
+        f'DATE(created_at) BETWEEN DATE("{args.date}") AND DATE("{args.enddate}")'
+    )
+else:
+    trainDataset = trainDataset.where(f'DATE(created_at) = DATE("{args.date}")')
 
 logger.info(f"Processing {trainDataset.count()} rows.")
 
