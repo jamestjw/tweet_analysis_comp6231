@@ -1,7 +1,8 @@
 CLUSTER_NAME=sentiment-analysis-cluster-$(date +%s)
 REGION=us-east1
-NUM_WORKERS=5
-DATE=2022-05-01
+NUM_WORKERS=2
+DATE=2022-05-22
+ENDDATE=2022-05-26
 
 # Worker machine type: 8 cores and 45gb * 1024 memory
 gcloud beta dataproc clusters create ${CLUSTER_NAME} \
@@ -25,5 +26,4 @@ gcloud dataproc jobs submit pyspark --cluster ${CLUSTER_NAME}\
     --properties="spark.jars.packages=com.johnsnowlabs.nlp:spark-nlp_2.12:4.0.2,spark.kryoserializer.buffer.max=2000M,spark.serializer=org.apache.spark.serializer.KryoSerializer,spark.driver.maxResultSize=0"\
     --driver-log-levels root=FATAL \
     --project="comp-6231-356417" \
-    generate-sentiment-analysis.py -- ${DATE}
-
+    generate-sentiment-analysis.py -- ${DATE} --enddate ${ENDDATE}
