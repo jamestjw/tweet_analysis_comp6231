@@ -1,5 +1,11 @@
 \documentclass[a4paper,12pt]{article}
 
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{xcolor}
+
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
 
 \begin{document}
 
@@ -23,11 +29,49 @@ An idea of what the project is about and its possible use cases?
 \section{Tools and Technologies}
 An introduction to the tools that were used and why they were chosen for this project
 
+\subsection{GCS}
+Some description about GCS
+
+\subsection{BigQuery}
+Some description about BigQuery
+
+\subsection{Dataproc and Spark}
+\label{sec:spark}
+Some description about Dataproc and Spark. Mention cluster configuration, number instances, type of instances etc. Refer readers to our scripts for specifics.
+
 \section{Dataset}
-Some details about the dataset and how it was obtained'
+\label{sec:dataset}
+Some details about the dataset and how it was obtained.
 
 \section{Processing of Data}
-How the data was processed
+
+As mentioned in Section \ref{sec:spark}, we define the processing of the data as a Spark job. The steps involved in the job are illustrated in Figure \ref{fig:data-processing-pipeline} and will be further elaborated on in the subsequent sections. Our processing pipeline relies heavily on the Spark NLP library\cite{sparknlp}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{data-processing.png}
+\caption{The processing pipeline}
+\label{fig:data-processing-pipeline}
+\end{figure}
+
+\subsection{Data Ingestion}
+In order to use data stored in BigQuery as an input to our Spark job, we used the Spark BigQuery connector\cite{spark-bigquery-connector}. The Spark script reads from a table that contains all the tweets that were procured as described in Section \ref{sec:dataset}. 
+
+Each run of the Spark job would typically be executed on 4-5 days worth of tweets as we discovered that the Spark jobs had a tendency of failing when working with larger amounts of data. This was true even when the CPU and memory utilisation of the worker nodes were relatively healthy and thus should be further investigated.
+
+\subsection{Document Assembler}
+The first step of the pipeline is the \texttt{DocumentAssembler}\cite{document-assembler}. This prepares the data into a format that is processable by Spark NLP and is essentially the entry point for every Spark NLP pipeline.
+
+\subsection{Generation of Sentence Embeddings}
+We generate sentence embeddings by leveraging a Universal Sentence Encoder\cite{universal-sentence-encoder} made available by Tensorflow. The output of this stage is a 512-dimensional vector that semantically captures the meaning of each tweet. This is the basis upon which the downstream classification algorithms build on.
+
+\subsection{Sentiment Classification}
+To actually use the embeddings described in the previous section, we utilise ClassifierDLModels\cite{classifier-dl-model} to classify the tweets. Each ClassifierDLModels essentially assigns a label to each tweet. To identify the emotion, presence of cyberbullying and presence of racism in each tweet, we use the \texttt{classifierdl\_use\_emotion}, \texttt{classifierdl\_use\_cyberbullying} and \texttt{classifierdl\_use\_sarcasm} pretrained models respectively ({\color{red}TODO: Better way of phrasing this?}). 
+
+The emotion classifier produces the values \texttt{sadness}, \texttt{joy}, \texttt{love}, \texttt{anger}, \texttt{fear} and \texttt{surprise}. The cyberbullying classifier produces the values \texttt{neutral}, \texttt{racism} and \texttt{sexism}. The sarcasm classifier produces the values \texttt{sarcasm} and \texttt{normal}. 
+
+\subsection{Storing of Output}
+The output is then stored in a separate table in BigQuery. Note that the BigQuery Spark connector is once again used here, thus allowing the output of a Spark job to be appended directly to a BigQuery table.
 
 \section{Results}
 Some visualisations and the insights we obtained
