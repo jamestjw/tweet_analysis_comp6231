@@ -63,6 +63,7 @@ Each run of the Spark job would typically be executed on 4-5 days worth of tweet
 The first step of the pipeline is the \texttt{DocumentAssembler}\cite{document-assembler}. This prepares the data into a format that is processable by Spark NLP and is essentially the entry point for every Spark NLP pipeline.
 
 \subsection{Generation of Sentence Embeddings}
+\label{sec:sentence-embeddings}
 We generate sentence embeddings by leveraging a Universal Sentence Encoder\cite{universal-sentence-encoder} made available by Tensorflow. The output of this stage is a 512-dimensional vector that semantically captures the meaning of each tweet. This is the basis upon which the downstream classification algorithms build on.
 
 \subsection{Sentiment Classification}
@@ -77,7 +78,7 @@ The output is then stored in a separate table in BigQuery. Note that the BigQuer
 Some visualisations and the insights we obtained
 
 \section{Future Work}
-hmmm idk
+An idea that we originally had was to run an unsupervised clustering algorithm on the sentence embeddings produced in Section \ref{sec:sentence-embeddings}. The clustering algorithm that we had in mind was DBScan\cite{Ester96adensity-based}, with the objective of clustering tweets with similar topics. Unfortunately, we were not able to find a satisfactorily efficient implementation of the algorithm to employ with Spark. Due to the size of our dataset and the high number of dimensions of the embeddings, an efficient implementation was crucial to the success of this idea. Given that we had limited resources, we were forced to abandon this idea, however, it should be revisited in the future by implementing our own version of the DBScan algorithm.
 
 \section{Conclusion}
 We worked hard, and achieved very little.
