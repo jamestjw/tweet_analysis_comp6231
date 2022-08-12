@@ -91,7 +91,42 @@ The emotion classifier produces the values \texttt{sadness}, \texttt{joy}, \text
 The output is then stored in a separate table in BigQuery. Note that the BigQuery Spark connector is once again used here, thus allowing the output of a Spark job to be appended directly to a BigQuery table.
 
 \section{Results}
-TODO: Some visualizations and the insights we obtained
+
+To visualize the general sentiment expressed in tweets, detected emotions and cyberbullying, we used Jupyter notebook to
+display and provide functionality to query the data interactively.
+
+Emotions identified include: Joy, Surprise, Fear, Sadness while detecting Racism, Sexism or Neutral tweets.
+
+Below you see the sample output for a query on racist tweets between the 1st and 4th of May, 2022. Note, the data output
+has been cropped to 7 tweets for convenience.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{racism.png}
+	\caption{Sample Query: Racist Tweets}
+	\label{fig:Racist-Tweet-Query}
+\end{figure}
+
+Below is another visualization provided using Jupyter notebook, that enables us to visualize the emotions of tweets over time.
+Interestingly, you can see the spike of fear on May 24th, 2022.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{graph.png}
+	\caption{Sample Query: General Sentiment Over Time}
+	\label{fig:Emotion-Time-Query}
+\end{figure}
+
+By using our interactive tweet-emotion visualizer, we can
+observe the emotion of the general users on twitter, and here we unfortunately notice that a shooting had taken place
+on the 24th of May, 2022.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{graphTweets.png}
+	\caption{Sample Query: Fear}
+	\label{fig:Fear-Query}
+\end{figure}
 
 \section{Future Work}
 An idea that we originally had was to run an unsupervised clustering algorithm on the sentence embeddings produced in Section \ref{sec:sentence-embeddings}. The clustering algorithm that we had in mind was DBScan\cite{Ester96adensity-based}, with the objective of clustering tweets with similar topics. Unfortunately, we were not able to find a satisfactorily efficient implementation of the algorithm to employ with Spark. Due to the size of our dataset and the high number of dimensions of the embeddings, an efficient implementation was crucial to the success of this idea. Given that we had limited resources, we were forced to abandon this idea, however, it should be revisited in the future by implementing our own version of the DBScan algorithm.
