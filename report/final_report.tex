@@ -40,7 +40,7 @@ Furthermore, Big Query was chosen to store the tweets as tabular data in dataset
 and a SQL Engine that enabled ease of data import due to it's compatibility with GCS. It's also an affordable big data
 warehouse, where the first Terabyte of data processed each month is free.
 
-In order to process our data and draw insight, we chose Apache Spark, an open-source unified analytics engine for
+In order to process our data and draw insight from processed tweets, we used Apache Spark, an open-source unified analytics engine for
 large-scale data processing. To run Apache Spark, we used Dataproc, given the fast, easy-to-use, and fully managed cloud
 service for running Apache Spark clusters in a simpler, more cost-efficient way. It helps you create clusters quickly,
 manage them easily, and save money by turning clusters off when you don't need them.
@@ -53,7 +53,58 @@ Some description about BigQuery
 
 \subsection{Dataproc and Spark}
 \label{sec:spark}
-Some description about Dataproc and Spark. Mention cluster configuration, number of instances, type of instances, etc. Refer readers to our scripts for specifics.
+
+Dataproc is a managed framework that runs on the Google Cloud Platform and ties together several popular tools for processing data. 
+We used it to run Apache Spark clusters. It's easy-to-use and relatively fast, as you can spin up a cluster in about 90 seconds.
+It’s cheaper than building your own cluster because you can spin up a Dataproc cluster when you need to run a job and
+shut it down afterward, so you only pay when jobs are running. Dataproc is priced at only 1 cent per virtual CPU in your
+cluster per hour. Conveniently, it’s integrated with other Google Cloud services, including Cloud Storage, BigQuery, and
+Cloud Bigtable, making it easy to transfer our data. Due to performance considerations as well as the high reliability of
+storage attached to Dataproc clusters, the default replication factor is set at 2.
+
+Compute Engine Virtual Machine instances (VMs) in a Dataproc cluster, consisting of master and worker
+virtual machines, require full internal IP networking cross connectivity. The default Virtual Private Cloud network provides
+this connectivity, and offers native Internal TCP/UDP Load Balancing and proxy systems for Internal
+HTTP and HTTPS Load Balancing.
+
+Dataproc clusters can be created using the Google Cloud Platform console, or alternatively to create a Dataproc cluster
+on the command line, run the Cloud SDK gcloud dataproc clusters create command locally in a terminal window or in
+Cloud Shell. Refer to section 7 - Code to see our code for cluster creation.
+
+Basic requirements for cluster creation include specifying a cluster name, region (global or a specific region for the cluster), and
+connectivity consisting of the number of master and worker nodes.
+
+gcloud dataproc clusters create cluster-name \
+--region=region
+
+The above command creates a cluster with default Dataproc service settings for your master and worker virtual machine
+instances, disk sizes and types, network type, region and zone where your cluster is deployed, and other cluster settings.
+
+In order to set attributes specific to the required resource, you can specify the specific values against the
+flag you want to modify.
+
+The following flags were used to specify unique attributes for the resources of our VMs:
+
+Type of machine to use for worker nodes.
+
+--worker-machine-type n1-standard-8 \
+
+The size of the boot disk, in our case a 128 GB disk.
+
+--master-boot-disk-size=128GB \
+--worker-boot-disk-size=128GB \
+
+We used the default number of master nodes (1 node), however, to specify otherwise when High Availability is critical,
+the number of master nodes in the cluster can be changed to 3.
+
+--num-masters=NUM_MASTERS
+
+The number of worker nodes in the cluster, we only used 2 worker nodes.
+
+--num-workers=NUM_WORKERS \
+
+To submit a job to a Dataproc cluster, run the gcloud CLI gcloud dataproc jobs submit command locally
+in a terminal window or in Cloud Shell.
 
 \section{Dataset}
 \label{sec:dataset}
