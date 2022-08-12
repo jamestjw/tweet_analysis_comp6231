@@ -24,10 +24,26 @@ https://www.discoverphds.com/blog/abstract-vs-introduction
 
 \section{Introduction}
 
-An idea of what the project is about and its possible use cases?
+This project aims to apply distributed system concepts with real applications, such as NoSQL systems for big data,
+and demonstrate the power of distributed systems in extracting and analyzing the general sentiment expressed in a large
+data set of tweets, and detecting emotions and cyberbullying using pretrained Spark NLP DL classifiers.
+Emotions identified include: Joy, Surprise, Fear, Sadness while detecting Racism, Sexism or Neutral tweets.
+
 
 \section{Tools and Technologies}
-An introduction to the tools that were used and why they were chosen for this project
+Given the large dataset, approximately 10 GB of scrapped tweets, we chose google cloud storage.
+Google Cloud Storage is a RESTful online file storage web service for storing and accessing data on a Google Cloud
+Platform infrastructure. The service combines the performance and scalability of the cloud with advanced
+security and sharing capabilities, all at no cost to a user using less than 15 GB of cloud space for free.
+
+Furthermore, Big Query was chosen to store the tweets as tabular data in datasets and tables. BigQuery is a data warehouse
+and a SQL Engine that enabled ease of data import due to it's compatibility with GCS. It's also an affordable big data
+warehouse, where the first Terabyte of data processed each month is free.
+
+In order to process our data and draw insight, we chose Apache Spark, an open-source unified analytics engine for
+large-scale data processing. To run Apache Spark, we used Dataproc, given the fast, easy-to-use, and fully managed cloud
+service for running Apache Spark clusters in a simpler, more cost-efficient way. It helps you create clusters quickly,
+manage them easily, and save money by turning clusters off when you don't need them.
 
 \subsection{GCS}
 Some description about GCS
