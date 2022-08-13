@@ -77,14 +77,15 @@ At the time of publication, Google was running multiple instances of Dremel rang
 BigQuery and Dremel have the same underlying architecture. By integrating Dremel columnar storage and tree architecture,
 BigQuery offers unprecedented performance. But BigQuery is much better than Dremel. Dremel is just an execution engine for BigQuery. In fact, the BigQuery service uses Google's innovative technologies such as Borg\cite{Borg}, Colossus, Capacitor, and Jupiter.
 
-A BigQuery client (usually the BigQuery web UI or bg command line tool or REST API) interacts with the Dremel engine
-through the client interface. Borg, Google's large cluster management system, allocates computing capacity to Dremel
-jobs. The Dremel job reads data from Google's Colossus file system over the Jupiter network, performs various SQL
-operations, and returns the results to the client. Dremel implements a multi-level server tree to execute queries.
+A BigQuery client (usually the BigQuery web UI, bg command line tool, or REST API) interacts with the Dremel engine through
+the client interface. Borg, Google's extensive cluster management system, allocates computing capacity to Dremel jobs.
+Data is read from Google's Colossus file system over the Jupiter network, SQL operations are performed, then the results
+are returned to the client. When executing queries, Dremel implements a multilevel server tree.
 
-The most expensive part of any big data analytics platform is almost always disk I/O. BigQuery stores data in a columnar
-format called capacitor\cite{StoringDremel} . As you can imagine, each field of a BigQuery table i.e. column is stored in
-a separate Capacitor file which enables BigQuery to achieve a very high compression ratio and scan throughput.
+Disk I/O is almost always the most expensive part of any big data analytics platform. The data stored in BigQuery is
+stored in a columnar format called capacitor\cite{StoringDremel}. As you can imagine, each field of the BigQuery table,
+i.e., column, is stored in a separate Capacitor file, enabling BigQuery to achieve a very high compression ratio and
+scan throughput.
 
 \subsection{Dataproc and Spark}
 \label{sec:spark}
