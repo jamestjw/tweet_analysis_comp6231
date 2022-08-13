@@ -28,14 +28,12 @@ from one day to another. Finally, We conclude the results and show the charts an
 \end{abstract}
 
 \section{Introduction}
-
 This project aims to apply distributed system concepts with real applications, such as NoSQL systems for big data,
 and demonstrate the power of distributed systems in extracting and analyzing the general sentiment expressed in a large
 data set of tweets, and detecting emotions and cyberbullying using pretrained Spark NLP DL classifiers.
 Emotions identified include: Joy, Surprise, Fear, Sadness while detecting Racism, Sexism or Neutral tweets.
 
 \section{Tools and Technologies}
-
 Given the large dataset, approximately 10 GB of scrapped tweets, we chose google cloud storage.
 Google Cloud Storage is a RESTful online file storage web service for storing and accessing data on a Google Cloud
 Platform infrastructure. The service combines the performance and scalability of the cloud with advanced
@@ -93,7 +91,6 @@ a separate Capacitor file which enables BigQuery to achieve very high compressio
 
 \subsection{Dataproc and Spark}
 \label{sec:spark}
-
 Dataproc is a managed framework that runs on the Google Cloud Platform and ties together several popular tools for processing data.
 We used it to run Apache Spark clusters. It's easy-to-use and relatively fast, as you can spin up a cluster in about 90 seconds.
 It’s cheaper than building your own cluster because you can spin up a Dataproc cluster when you need to run a job and
@@ -153,7 +150,6 @@ English language only. Approximately 1000000 tweets were scraped for each day be
 tweets were then saved in Google Cloud Storage.
 
 \section{Processing of Data}
-
 As mentioned in Section \ref{sec:spark}, we define the processing of the data as a Spark job. The steps involved in the
 job are illustrated in Figure \ref{fig:data-processing-pipeline} and will be further elaborated on in the subsequent
 sections. Our processing pipeline relies heavily on the Spark NLP library\cite{SparkNLP}.
@@ -166,7 +162,6 @@ sections. Our processing pipeline relies heavily on the Spark NLP library\cite{S
 \end{figure}
 
 \subsection{Data Ingestion}
-
 In order to use data stored in BigQuery as an input to our Spark job, we used the Spark BigQuery
 connector\cite{BigQueryconnector}. The Spark script reads from a table that contains all the tweets that were
 procured as described in Section \ref{sec:dataset}.
@@ -176,7 +171,6 @@ had a tendency of failing when working with larger amounts of data. This was tru
 utilization of the worker nodes were relatively healthy and thus should be further investigated.
 
 \subsection{Document Assembler}
-
 The first step of the pipeline is the \texttt{DocumentAssembler}\cite{DocumentAssembler}. This prepares the data into
 a format that is processable by Spark NLP and is essentially the entry point for every Spark NLP pipeline.
 
@@ -201,7 +195,6 @@ The emotion classifier produces the values \texttt{sadness}, \texttt{joy}, \text
 The output is then stored in a separate table in BigQuery. Note that the BigQuery Spark connector is once again used here, thus allowing the output of a Spark job to be appended directly to a BigQuery table.
 
 \section{Results}
-
 To visualize the general sentiment expressed in tweets, detected emotions and cyberbullying, we used Jupyter notebook to
 display and provide functionality to query the data interactively.
 
@@ -239,15 +232,12 @@ on the 24th of May, 2022.
 \end{figure}
 
 \section{Future Work}
-
 An idea that we originally had was to run an unsupervised clustering algorithm on the sentence embeddings produced in Section \ref{sec:sentence-embeddings}. The clustering algorithm that we had in mind was DBScan\cite{Ester96adensity-based}, with the objective of clustering tweets with similar topics. Unfortunately, we were not able to find a satisfactorily efficient implementation of the algorithm to employ with Spark. Due to the size of our dataset and the high number of dimensions of the embeddings, an efficient implementation was crucial to the success of this idea. Given that we had limited resources, we were forced to abandon this idea, however, it should be revisited in the future by implementing our own version of the DBScan algorithm.
 
 \section{Code}
-
 The code to reproduce our project may be found in our Github repository \cite{Githubrepository}.
 
 \section{Conclusion}
-
 We explored various distributed applications that stored, processes, and analyzed data, while considering multiple
 factors such as performance, cost, ease-of-use, availability, etc. This project has demonstrated the convenience
 of such applications based on Google Cloud architecture. Although, our data processing was not as compute intensive
