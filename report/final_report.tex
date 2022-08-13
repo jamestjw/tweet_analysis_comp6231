@@ -11,15 +11,20 @@
 
 \title{Large Scale Sentiment Analysis of Tweets }%replace with the appropriate homework number
 \author{
-	James Tan Juan Whei\\
-	Concordia University
-}  
+	James Tan Juan Whei 40161156\\
+	Vithushon Maheswaran 27052715\\
+	Saeedeh Moghimi 40184202\\
+	AmirAli Sabaghpourfard 40185709\\
+	\\Concordia University
+}
 \maketitle
 
 \begin{abstract}
-Abstract, here is what an abstract is compared to an intro
-
-https://www.discoverphds.com/blog/abstract-vs-introduction
+The aim of this paper is to analyze sentiments of tweets in a specific duration of time. We have used library called snnsrcape to
+scrape approximately one million tweets with size of 10GB and Apache spark and BigQuery to store and analyze the data.
+The library we have used to classify the tweets is called ClassifierDLModels. The results shows the percentage of sentiment in
+tweets during a certain time and also as the was a shooting in this period, charts shows how much sentiment of fear has been increased
+from one day to another. Finally, We conclude the results and show the charts and results.
 \end{abstract}
 
 \section{Introduction}
@@ -29,8 +34,8 @@ and demonstrate the power of distributed systems in extracting and analyzing the
 data set of tweets, and detecting emotions and cyberbullying using pretrained Spark NLP DL classifiers.
 Emotions identified include: Joy, Surprise, Fear, Sadness while detecting Racism, Sexism or Neutral tweets.
 
-
 \section{Tools and Technologies}
+
 Given the large dataset, approximately 10 GB of scrapped tweets, we chose google cloud storage.
 Google Cloud Storage is a RESTful online file storage web service for storing and accessing data on a Google Cloud
 Platform infrastructure. The service combines the performance and scalability of the cloud with advanced
@@ -46,15 +51,50 @@ service for running Apache Spark clusters in a simpler, more cost-efficient way.
 manage them easily, and save money by turning clusters off when you don't need them.
 
 \subsection{GCS}
-Some description about GCS
+GCS, or Google Cloud Storage\cite{GCS}, is an object storage service on the Google Cloud. GCS stores a variety of data
+(objects) in containers called buckets. GCS offers different types of classes like Standard, Nearline, Coldline, and
+Archive, which make a difference in price and availability\cite{GCSClasses}.
+
+For this project, we used GCS to store CSV files before loading them into  BigQuery. BigQuery can load documents from
+local and GCS, but since we wanted one table in BigQuery and big size of data files, it wasn't a good idea to store
+documents locally and make BigQuery load data from local. To decrease time consumption, we uploaded all the CSV files to
+a Standard class GCS, and then BigQuary loaded data from there. In order to upload files to GCS, we used this command:
+
+\# gsutil cp *.csv gs://tweets\_bucket\_comp6231/
 
 \subsection{BigQuery}
-Some description about BigQuery
+Google BigQuery is a cloud-native, enterprise-grade data warehouse. BigQuery was first made available as a service in
+2010 and became generally available in November 2011. Since its debut, BigQuery has developed into a more affordable,
+fully-managed data warehouse that can process petabyte-scale datasets with lightning-fast interactive and ad-hoc queries.
+BigQuery is now more functional thanks to its integration with a number of Google Cloud Platform (GCP) services and
+third-party tools.
+
+BigQuery, or more specifically data warehouse as a service, is serverless. No servers or database software needs to be
+installed or managed. The BigQuery service maintains the infrastructure, including scalability and high-availability,
+as well as the underlying software. The pricing structure is fairly straightforward: Every TB of processed data is 5
+Dollars. BigQuery reveals a simple client interface which enables users to run interactive queries.
+
+
+BigQuery is built on  Dremel\cite{Dremel}, which has been operating internally at Google since 2006. Dremel is Google's
+ad hoc interactive  query system for analyzing read-only nested data. The first Dremel paper was published in 2010.
+At the time of publication, Google was running multiple instances of Dremel ranging from tens to thousands of nodes.
+
+BigQuery and Dremel have the same underlying architecture. By integrating Dremel columnar storage and tree architecture,
+BigQuery offers unprecedented performance. But BigQuery is much better than Dremel. Dremel is just an execution engine for BigQuery. In fact, the BigQuery service uses Google's innovative technologies such as Borg\cite{Borg}, Colossus, Capacitor, and Jupiter.
+
+A BigQuery client (usually the BigQuery web UI or bg command line tool or REST API) interacts with the Dremel engine
+through the client interface. Borg, Google's large cluster management system, allocates computing capacity to Dremel
+jobs. The Dremel job reads data from Google's Colossus file system over the Jupiter network, performs various SQL
+operations, and returns the results to the client. Dremel implements a multi-level server tree to execute queries.
+
+The most expensive part of any big data analytics platform is almost always disk I/O. BigQuery stores data in a columnar
+format called capacitor\cite{StoringDremel} . As you can imagine, each field of BigQuery table i.e. column is stored in
+a separate Capacitor file which enables BigQuery to achieve very high compression ratio and scan throughput.
 
 \subsection{Dataproc and Spark}
 \label{sec:spark}
 
-Dataproc is a managed framework that runs on the Google Cloud Platform and ties together several popular tools for processing data. 
+Dataproc is a managed framework that runs on the Google Cloud Platform and ties together several popular tools for processing data.
 We used it to run Apache Spark clusters. It's easy-to-use and relatively fast, as you can spin up a cluster in about 90 seconds.
 It’s cheaper than building your own cluster because you can spin up a Dataproc cluster when you need to run a job and
 shut it down afterward, so you only pay when jobs are running. Dataproc is priced at only 1 cent per virtual CPU in your
@@ -97,22 +137,26 @@ The size of the boot disk, in our case a 128 GB disk.
 We used the default number of master nodes (1 node), however, to specify otherwise when High Availability is critical,
 the number of master nodes in the cluster can be changed to 3.
 
---num-masters=NUM_MASTERS
+--num-masters=1
 
 The number of worker nodes in the cluster, we only used 2 worker nodes.
 
---num-workers=NUM_WORKERS \
+--num-workers=2 \
 
 To submit a job to a Dataproc cluster, run the gcloud CLI gcloud dataproc jobs submit command locally
 in a terminal window or in Cloud Shell.
 
 \section{Dataset}
 \label{sec:dataset}
-We relied heavily on the snscrape library\footnote{Scraper for social networking services (SNS): https://github.com/JustAnotherArchivist/snscrape} to scrape tweets. We filtered for tweets that were in the English language only. Approximately 1000000 tweets were scraped for each day between 2022-05-01 and 2022-07-12. The tweets were then saved in Google Cloud Storage.
+We relied heavily on the snscrape \cite{snscrape} library to scrape tweets. We filtered for tweets that were in the
+English language only. Approximately 1000000 tweets were scraped for each day between 2022-05-01 and 2022-07-12. The
+tweets were then saved in Google Cloud Storage.
 
 \section{Processing of Data}
 
-As mentioned in Section \ref{sec:spark}, we define the processing of the data as a Spark job. The steps involved in the job are illustrated in Figure \ref{fig:data-processing-pipeline} and will be further elaborated on in the subsequent sections. Our processing pipeline relies heavily on the Spark NLP library\footnote{Spark NLP: State of the Art Natural Language Processing: https://nlp.johnsnowlabs.com}.
+As mentioned in Section \ref{sec:spark}, we define the processing of the data as a Spark job. The steps involved in the
+job are illustrated in Figure \ref{fig:data-processing-pipeline} and will be further elaborated on in the subsequent
+sections. Our processing pipeline relies heavily on the Spark NLP library\cite{SparkNLP}.
 
 \begin{figure}[h]
 \centering
@@ -122,21 +166,36 @@ As mentioned in Section \ref{sec:spark}, we define the processing of the data as
 \end{figure}
 
 \subsection{Data Ingestion}
-In order to use data stored in BigQuery as an input to our Spark job, we used the Spark BigQuery connector\footnote{Use the BigQuery connector with Spark: https://cloud.google.com/dataproc/docs/tutorials/bigquery-connector-spark-example}. The Spark script reads from a table that contains all the tweets that were procured as described in Section \ref{sec:dataset}. 
 
-Each run of the Spark job would typically be executed on 4-5 days' worth of tweets as we discovered that the Spark jobs had a tendency of failing when working with larger amounts of data. This was true even when the CPU and memory utilization of the worker nodes were relatively healthy and thus should be further investigated.
+In order to use data stored in BigQuery as an input to our Spark job, we used the Spark BigQuery
+connector\cite{BigQueryconnector}. The Spark script reads from a table that contains all the tweets that were
+procured as described in Section \ref{sec:dataset}.
+
+Each run of the Spark job would typically be executed on 4-5 days' worth of tweets as we discovered that the Spark jobs
+had a tendency of failing when working with larger amounts of data. This was true even when the CPU and memory
+utilization of the worker nodes were relatively healthy and thus should be further investigated.
 
 \subsection{Document Assembler}
-The first step of the pipeline is the \texttt{DocumentAssembler}\footnote{https://nlp.johnsnowlabs.com/api/com/johnsnowlabs/nlp/DocumentAssembler}. This prepares the data into a format that is processable by Spark NLP and is essentially the entry point for every Spark NLP pipeline.
+
+The first step of the pipeline is the \texttt{DocumentAssembler}\cite{DocumentAssembler}. This prepares the data into
+a format that is processable by Spark NLP and is essentially the entry point for every Spark NLP pipeline.
 
 \subsection{Generation of Sentence Embeddings}
 \label{sec:sentence-embeddings}
-We generate sentence embeddings by leveraging a Universal Sentence Encoder\footnote{https://www.tensorflow.org/hub/tutorials/semantic\_similarity\_with\_tf\_hub\_universal\_encoder?hl=en} made available by Tensorflow. The output of this stage is a 512-dimensional vector that semantically captures the meaning of each tweet. This is the basis upon which the downstream classification algorithms build on.
+
+We generate sentence embeddings by leveraging a Universal Sentence Encoder\cite{semanticSimilarity} made available by
+Tensorflow. The output of this stage is a 512-dimensional vector that semantically captures the meaning of each tweet.
+This is the basis upon which the downstream classification algorithms build on.
 
 \subsection{Sentiment Classification}
-To actually use the embeddings described in the previous section, we utilise ClassifierDLModels\footnote{https://nlp.johnsnowlabs.com/api/com/johnsnowlabs/nlp/annotators/classifier/dl/ClassifierDLModel.html} to classify the tweets. Each ClassifierDLModels essentially assigns a label to each tweet. To identify the emotion, presence of cyberbullying and presence of racism in each tweet, we use the \texttt{classifierdl\_use\_emotion}, \texttt{classifierdl\_use\_cyberbullying} and \texttt{classifierdl\_use\_sarcasm} pretrained models respectively ({\color{red}TODO: Better way of phrasing this?}). 
+To actually use the embeddings described in the previous section, we utilise ClassifierDLModels\cite{ClassifierDLModel}
+to classify the tweets. Each ClassifierDLModels essentially assigns a label to each tweet. To identify the emotion,
+presence of cyberbullying and presence of racism in each tweet, we use the \texttt{classifierdl\_use\_emotion},
+\texttt{classifierdl\_use\_cyberbullying} and \texttt{classifierdl\_use\_sarcasm} pretrained models respectively.
 
-The emotion classifier produces the values \texttt{sadness}, \texttt{joy}, \texttt{love}, \texttt{anger}, \texttt{fear} and \texttt{surprise}. The cyberbullying classifier produces the values \texttt{neutral}, \texttt{racism} and \texttt{sexism}. The sarcasm classifier produces the values \texttt{sarcasm} and \texttt{normal}. 
+The emotion classifier produces the values \texttt{sadness}, \texttt{joy}, \texttt{love}, \texttt{anger},
+\texttt{fear} and \texttt{surprise}. The cyberbullying classifier produces the values \texttt{neutral},
+\texttt{racism} and \texttt{sexism}. The sarcasm classifier produces the values \texttt{sarcasm} and \texttt{normal}.
 
 \subsection{Storing of Output}
 The output is then stored in a separate table in BigQuery. Note that the BigQuery Spark connector is once again used here, thus allowing the output of a Spark job to be appended directly to a BigQuery table.
@@ -180,10 +239,12 @@ on the 24th of May, 2022.
 \end{figure}
 
 \section{Future Work}
+
 An idea that we originally had was to run an unsupervised clustering algorithm on the sentence embeddings produced in Section \ref{sec:sentence-embeddings}. The clustering algorithm that we had in mind was DBScan\cite{Ester96adensity-based}, with the objective of clustering tweets with similar topics. Unfortunately, we were not able to find a satisfactorily efficient implementation of the algorithm to employ with Spark. Due to the size of our dataset and the high number of dimensions of the embeddings, an efficient implementation was crucial to the success of this idea. Given that we had limited resources, we were forced to abandon this idea, however, it should be revisited in the future by implementing our own version of the DBScan algorithm.
 
 \section{Code}
-The code to reproduce our project may be found in our Github repository.\footnote{Github repository of the project: https://github.com/jamestjw/tweet\_analysis\_comp6231} 
+
+The code to reproduce our project may be found in our Github repository \cite{Githubrepository}.
 
 \section{Conclusion}
 
